@@ -23,8 +23,9 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
-    ];
 
+    ];
+    public $timestamps = false;
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -33,6 +34,7 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
+
     ];
 
     /**
@@ -42,6 +44,8 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'create_at' => 'datetime',
+
     ];
 
     /**
