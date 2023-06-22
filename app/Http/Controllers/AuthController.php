@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
-
+use App\Models\User;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
 class AuthController extends Controller
 {
     /**
@@ -15,7 +19,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login','register']]);
     }
 
     /**
@@ -33,6 +37,61 @@ class AuthController extends Controller
 
         return $this->respondWithToken($token);
     }
+
+
+    public function register()
+    {
+        $credentials = request(['name','email', 'password']);
+        // $credentials['password'] = bcrypt($credentials['password']);
+        // User::create($credentials);
+
+        $credentials->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        User::create([
+            'name' => $credentials->name,
+            'email' => $credentials->email,
+            'password' => Hash::make($credentials->password),
+        ]);
+
+        return response()->json('success');
+    }
+
+
+    // // public function register()
+    // // {
+    // //     $credentials = request(['name','email', 'password']);
+    // //     $credentials['password'] = bcrypt($credentials['password']);
+    // //     User::create($credentials);
+
+    // //     return response()->json('success');
+    // // }
+    // public function register(Request $request)
+    // {
+    //     $request->validate([
+    //         'name' => ['required', 'string', 'max:255'],
+    //         'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
+    //         'password' => ['required', 'confirmed', Rules\Password::defaults()],
+    //     ]);
+
+    //     $user = User::create([
+    //         'name' => $request->name,
+    //         'email' => $request->email,
+    //         'password' => Hash::make($request->password),
+    //     ]);
+
+    //     event(new Registered($user));
+
+    //     Auth::login($user);
+
+    //     //return response()->noContent();
+    //     return response()->json('success');
+    // }
+
+
 
     /**
      * Get the authenticated User.
