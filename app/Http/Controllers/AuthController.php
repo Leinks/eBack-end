@@ -31,33 +31,41 @@ class AuthController extends Controller
     {
         $credentials = request(['email', 'password']);
 
-        if (! $token = auth()->attempt($credentials)) {
+        if(! $credentials['email']){
+            return response()->json(['error' => 'El campo Email es Obligatorio'], 401);
+        }
+        else if (! $token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
+            // return response()->json(['error' => $token], 401);
         }
 
         return $this->respondWithToken($token);
     }
 
 
-    public function register()
+    public function register(Request $credentials)
     {
-        $credentials = request(['name','email', 'password']);
+        
+        // $credentials = request(['name','email', 'password']);
         // $credentials['password'] = bcrypt($credentials['password']);
         // User::create($credentials);
+        // return response()->json($credentials, 200);
 
-        $credentials->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        // $credentials->validate([
+        //     'name' => ['required', 'string', 'max:255'],
+        //     'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
+        //     'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        // ]);
+        
+        User::factory()->create([
+                'name' => $credentials->name,
+                'email' => $credentials->email,
+                'password' => Hash::make($credentials->password),
+                'remember_token' => Hash::make($credentials->password.$credentials->email.now()),
+            ]);
+            return response()->json($credentials, 200);
 
-        User::create([
-            'name' => $credentials->name,
-            'email' => $credentials->email,
-            'password' => Hash::make($credentials->password),
-        ]);
-
-        return response()->json('success');
+        // return response()->json('success');
     }
 
 

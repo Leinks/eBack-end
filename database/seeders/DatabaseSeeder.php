@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@mail.com',
-            'password'  => bcrypt('laravel'),
+            'password'  => bcrypt('123456789'),
         ]);
     }
 }
